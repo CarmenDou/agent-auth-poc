@@ -15,6 +15,7 @@ export const auth = betterAuth({
   emailAndPassword: { enabled: true }, // 让"人"能有账号来批准
   plugins: [
     agentAuth({
+      allowDynamicHostRegistration: true,
       providerName: "InsForge POC",
       providerDescription: "Agent auth 流程 POC（这是个假的后端）",
       capabilities: [
@@ -45,6 +46,7 @@ const handler = toNodeHandler(auth);
 http
   .createServer((req, res) => {
     // 顺手加个根路径提示
+    if (req.url === "/.well-known/agent-configuration") { (req as any).url = "/api/auth/agent-configuration"; return handler(req, res); }
     if (req.url === "/") {
       res.writeHead(200, { "content-type": "text/plain; charset=utf-8" });
       res.end(

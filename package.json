@@ -7,9 +7,11 @@
     "agent": "tsx agent.ts"
   },
   "dependencies": {
+    "@auth/agent": "^0.6.2",
     "@better-auth/agent-auth": "^0.6.2",
     "better-auth": "^1.6.25",
     "better-sqlite3": "^12.11.1",
+    "jose": "^6.2.4",
     "tsx": "^4.23.1"
   }
 }
