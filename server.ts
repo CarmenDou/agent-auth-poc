@@ -16,6 +16,7 @@ export const auth = betterAuth({
   plugins: [
     agentAuth({
       allowDynamicHostRegistration: true,
+      modes: ["autonomous"],
       providerName: "InsForge POC",
       providerDescription: "Agent auth 流程 POC（这是个假的后端）",
       capabilities: [
