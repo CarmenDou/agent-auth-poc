@@ -1,5 +1,6 @@
-// 一个真实的 Agent Auth provider（Better Auth + @better-auth/agent-auth）
-// 跑起来后：agent 可以发现它、注册、请求能力、执行；高风险能力要人批准。
+// A real Agent Auth provider (Better Auth + @better-auth/agent-auth).
+// Once running: an agent can discover it, register, request capabilities, and
+// execute them; high-risk capabilities require human approval.
 import { betterAuth } from "better-auth";
 import { agentAuth } from "@better-auth/agent-auth";
 import { toNodeHandler } from "better-auth/node";
@@ -12,23 +13,23 @@ export const auth = betterAuth({
   baseURL: `http://localhost:${PORT}`,
   secret: "poc-demo-secret-please-change-32chars-min",
   database: new Database("poc.sqlite"),
-  emailAndPassword: { enabled: true }, // 让"人"能有账号来批准
+  emailAndPassword: { enabled: true }, // so a human can have an account to approve with
   plugins: [
     agentAuth({
       allowDynamicHostRegistration: true,
       modes: ["autonomous"],
       providerName: "InsForge POC",
-      providerDescription: "Agent auth 流程 POC（这是个假的后端）",
+      providerDescription: "Agent auth flow POC (this is a fake backend)",
       capabilities: [
         {
           name: "get_status",
-          description: "读一下项目状态（低风险，不用人）",
+          description: "Read project status (low risk, no human needed)",
           approvalStrength: "none",
           input: { type: "object", properties: {} },
         },
         {
           name: "create_project",
-          description: "建一个项目（高风险 → 要人批准）",
+          description: "Create a project (high risk -> requires human approval)",
           approvalStrength: "session",
           input: { type: "object", properties: { name: { type: "string" } } },
         },
@@ -46,17 +47,16 @@ export const auth = betterAuth({
 const handler = toNodeHandler(auth);
 http
   .createServer((req, res) => {
-    // 顺手加个根路径提示
     if (req.url === "/.well-known/agent-configuration") { (req as any).url = "/api/auth/agent-configuration"; return handler(req, res); }
     if (req.url === "/") {
       res.writeHead(200, { "content-type": "text/plain; charset=utf-8" });
       res.end(
-        "InsForge Agent-Auth POC 在跑。\n" +
-          `发现文档: http://localhost:${PORT}/api/auth/agent-configuration\n` +
-          `能力清单: http://localhost:${PORT}/api/auth/capability/list\n`
+        "InsForge Agent-Auth POC is running.\n" +
+          `Discovery:    http://localhost:${PORT}/api/auth/agent-configuration\n` +
+          `Capabilities: http://localhost:${PORT}/api/auth/capability/list\n`
       );
       return;
     }
     handler(req, res);
   })
-  .listen(PORT, () => console.log(`✅ POC server 在跑: http://localhost:${PORT}`));
+  .listen(PORT, () => console.log(`POC server running: http://localhost:${PORT}`));

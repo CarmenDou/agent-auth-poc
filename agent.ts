@@ -1,4 +1,5 @@
-// 扮演 agent，用官方 SDK @auth/agent 走一遍 agent auth 流程（每步带超时，绝不挂死）
+// Play the agent: use the official @auth/agent SDK to walk the full agent-auth
+// flow (each step has a timeout so it never hangs).
 import { AgentAuthClient } from "@auth/agent";
 const PROVIDER = "http://localhost:3737";
 const line = (s: string) => console.log("\n" + s);
@@ -8,31 +9,31 @@ const withTimeout = <T,>(p: Promise<T>, ms: number, label: string) =>
 const client = new AgentAuthClient({ allowDirectDiscovery: true });
 
 try {
-  line("① 发现 provider");
+  line("1. Discover provider");
   const config: any = await withTimeout(client.discoverProvider(PROVIDER), 8000, "discover");
   console.log("   provider:", config.provider_name);
 
-  line("② 自注册 agent（自动生成 Ed25519 密钥）");
+  line("2. Self-register the agent (SDK generates an Ed25519 keypair)");
   const agent: any = await withTimeout(
     client.connectAgent({ provider: PROVIDER, mode: "autonomous", name: "poc-assistant", capabilities: ["get_status", "create_project"] }),
     12000, "connect");
   console.log("   agentId:", agent.agentId, "| status:", agent.status ?? "?");
 
-  line("③ 执行低风险 get_status（应直接过，不用人）");
+  line("3. Run low-risk get_status (should pass without a human)");
   try {
     const r = await withTimeout(client.executeCapability({ agentId: agent.agentId, capability: "get_status", arguments: {} }), 8000, "get_status");
-    console.log("   ✅ 结果:", JSON.stringify(r));
-  } catch (e: any) { console.log("   ⛔", e?.message ?? JSON.stringify(e)); }
+    console.log("   OK result:", JSON.stringify(r));
+  } catch (e: any) { console.log("   blocked:", e?.message ?? JSON.stringify(e)); }
 
-  line("④ 执行高风险 create_project（应被拦，要人批准）");
+  line("4. Run high-risk create_project (should be blocked, needs human approval)");
   try {
     const r = await withTimeout(client.executeCapability({ agentId: agent.agentId, capability: "create_project", arguments: { name: "demo" } }), 6000, "create_project");
-    console.log("   ✅ 结果:", JSON.stringify(r));
+    console.log("   OK result:", JSON.stringify(r));
   } catch (e: any) {
-    if (String(e?.message).includes("__timeout__")) console.log("   ⛔ 被拦 → 挂起等待人批准（高风险 step-up，符合预期）");
-    else console.log("   ⛔ 被拦:", e?.code ?? e?.message ?? JSON.stringify(e));
+    if (String(e?.message).includes("__timeout__")) console.log("   blocked -> pending human approval (high-risk step-up, as expected)");
+    else console.log("   blocked:", e?.code ?? e?.message ?? JSON.stringify(e));
   }
 } catch (e: any) {
-  console.log("\n出错:", e?.code ?? e?.message ?? JSON.stringify(e));
+  console.log("\nerror:", e?.code ?? e?.message ?? JSON.stringify(e));
 }
 process.exit(0);
