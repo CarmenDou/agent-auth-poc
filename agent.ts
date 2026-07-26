@@ -14,7 +14,7 @@ try {
 
   line("② 自注册 agent（自动生成 Ed25519 密钥）");
   const agent: any = await withTimeout(
-    client.connectAgent({ provider: PROVIDER, name: "poc-assistant", capabilities: ["get_status", "create_project"] }),
+    client.connectAgent({ provider: PROVIDER, mode: "autonomous", name: "poc-assistant", capabilities: ["get_status", "create_project"] }),
     12000, "connect");
   console.log("   agentId:", agent.agentId, "| status:", agent.status ?? "?");
 
