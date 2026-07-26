@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "server": "tsx server.ts",
-    "agent": "tsx agent.ts"
+    "agent": "tsx agent.ts",
+    "auth0": "tsx auth0-agent.ts"
   },
   "dependencies": {
     "@auth/agent": "^0.6.2",
