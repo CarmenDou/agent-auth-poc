@@ -3,3 +3,5 @@ node_modules/
 *.sqlite-journal
 *.log
 package-lock.json
+.env.auth0
+.env
